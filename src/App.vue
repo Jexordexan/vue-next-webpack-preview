@@ -1,22 +1,33 @@
 <template>
-  <img src="./logo.png">
-  <h1>Hello Vue 3!</h1>
-  <button @click="inc">Clicked {{ count }} times.</button>
+  <div>
+    <img src="./logo.png">
+    <h1>Hello Vue 3!</h1>
+    <button @click="decrementAsync">Decrement</button>
+    Counter: {{ counter }}
+    <button @click="incrementAsync">Increment</button>
+    <ToDo />
+  </div>
+  <!-- <List :size="1200"></List> -->
 </template>
 
 <script>
-import { ref } from 'vue'
+import List from './components/List.vue'
+import ToDo from './components/ToDo.vue'
+import { provideStore, useStore } from './store/index'
 
 export default {
+  components: {
+    List,
+    ToDo,
+  },
   setup() {
-    const count = ref(0)
-    const inc = () => {
-      count.value++
-    }
+    provideStore()
+    const { counter, incrementAsync, decrementAsync } = useStore()
 
     return {
-      count,
-      inc
+      counter,
+      incrementAsync,
+      decrementAsync,
     }
   }
 }

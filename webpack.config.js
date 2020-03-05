@@ -11,6 +11,7 @@ module.exports = (env = {}) => ({
     publicPath: '/dist/'
   },
   resolve: {
+    extensions: ['.ts', '.js'],
     alias: {
       // this isn't technically needed, since the default `vue` entry for bundlers
       // is a simple `export * from '@vue/runtime-dom`. However having this
@@ -24,6 +25,14 @@ module.exports = (env = {}) => ({
       {
         test: /\.vue$/,
         use: 'vue-loader'
+      },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        options: {
+          appendTsSuffixTo: [/\.vue$/],
+        }
       },
       {
         test: /\.png$/,
