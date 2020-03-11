@@ -9,7 +9,7 @@ export default defineModule({
   state: {
     counter: 0,
   },
-  setup({ state, addModule }) {
+  setup({ state, module }) {
     const increment = mutation('increment', () => state.counter++);
     const decrement = mutation('decrement', () => state.counter--);
     const incrementAsync = async () => {

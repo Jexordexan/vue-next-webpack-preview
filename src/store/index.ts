@@ -2,6 +2,7 @@ import { storeProvider } from '../useStore';
 import createStore, { mutation } from '../vuex';
 import { computed } from 'vue';
 import counterModule from './counter';
+import todoModule from './todos';
 
 export interface ToDo {
   id: number;
@@ -11,40 +12,27 @@ export interface ToDo {
 
 export interface RootState {
   idCounter: number;
-  toDos: ToDo[];
 }
 
 const state: RootState = {
   idCounter: 0,
-  toDos: [],
 };
 
 const store = createStore({
   state,
-  setup({ state, addModule }) {
-    const addTodo = mutation('addTodo', (text: string) => {
-      state.toDos.push({
-        id: state.idCounter++,
-        text,
-        completed: false,
-      });
-    });
+  setup({ state, module }) {
+    const todos = module(todoModule(state));
+    const counter = module(counterModule);
 
-    const completeTodo = mutation('completeTodo', (id: number, completed: boolean = true) => {
-      const todo = state.toDos.find(t => t.id === id);
-      if (todo) todo.completed = completed;
+    const reset = mutation('resetTodos', () => {
+      todos.items.value = [];
+      counter.counter.value = 0;
     });
-
-    const getCompletedCount = computed(() => state.toDos.reduce((c, t) => (t.completed ? c + 1 : c), 0));
-    const getCompletedIndex = (index: number) => computed(() => state.toDos[index].completed);
-    const counter = addModule(counterModule);
 
     return {
       state,
-      addTodo,
-      completeTodo,
-      getCompletedCount,
-      getCompletedIndex,
+      todos,
+      reset,
       ...counter,
     };
   },
