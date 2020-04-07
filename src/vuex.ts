@@ -15,20 +15,39 @@ export interface ModuleOptions<State, R> extends StoreOptions<State, R> {
   name: string;
 }
 
+interface MutationObject {
+  type: string;
+  path: string;
+  payload: any;
+}
+
 // Globals
 let isStrict = false;
-let isCommitting = false;
+let currentMutation: any = null;
 let isInitializing = false;
 const stateStack: any[] = [];
 const modulePath: string[] = [];
+const subscriptions = new WeakMap();
 
-export function mutation<A extends any[]>(type: string, effect: (...args: A) => void): (...args: A) => void {
+export function subscribe<T extends object>(state: T, listener: (mutation: MutationObject, state: T) => void) {
+  if (subscriptions.has(state)) {
+    subscriptions.get(state).push(listener);
+  } else {
+    subscriptions.set(state, [listener]);
+  }
+}
+
+export function mutation<A extends any[]>(type: string, mutator: (...args: A) => void): (...args: A) => void {
   const path = modulePath.concat(type).join('/');
   return (...args: A) => {
-    isCommitting = true;
+    currentMutation = {
+      type,
+      path,
+      payload: args,
+    };
     console.log(path, args);
-    const ret = effect(...args);
-    isCommitting = false;
+    const ret = mutator(...args);
+    currentMutation = null;
     return ret;
   };
 }
@@ -40,13 +59,18 @@ export function defineModule<State extends object, R>(config: ModuleOptions<Stat
 function guard<T extends object>(state: T, strict: boolean = false) {
   Object.keys(state).forEach(key => {
     effect(() => {
-      if (state[key as keyof T] !== undefined && !(isInitializing || isCommitting)) {
+      if (state[key as keyof T] !== undefined && !(isInitializing || currentMutation)) {
         const keyPath = modulePath.concat(key).join('/');
         if (strict) {
           throw new Error('State mutated outside of a mutation: ' + keyPath);
         } else {
           console.warn('Do not mutate state outside a mutation: ' + keyPath);
         }
+      } else if (currentMutation) {
+        if (!subscriptions.has(state)) return;
+        subscriptions.get(state).forEach((listener: Function) => {
+          listener.call(null, state, currentMutation);
+        });
       }
     });
   });
