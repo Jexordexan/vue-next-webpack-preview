@@ -2,12 +2,13 @@
   <div>
     <img src="./logo.png" />
     <h1>Hello Vue 3!</h1>
-    <button @click="decrementAsync">Decrement</button>
+    <button class="btn-blue" @click="decrementAsync">
+      Decrement
+    </button>
     Counter: {{ counter }}
-    <button @click="incrementAsync">Increment</button>
+    <button class="btn-blue" @click="incrementAsync">Increment</button>
     <ToDo />
     {{ todos.items.length }}
-    <pre>{{ state }}</pre>
     <button @click="reset">Reset</button>
 
     <hr />
@@ -18,8 +19,8 @@
 </template>
 
 <script>
-import List from './components/List.vue';
-import ToDo from './components/ToDo.vue';
+import List from "./components/List.vue";
+import ToDo from "./components/ToDo.vue";
 import Covid from "./components/Covid.vue";
 import { provideStore, useStore } from "./store/index";
 import { watch } from "vue";
@@ -44,7 +45,7 @@ export default {
     covid.fetchStateData();
 
     watch(() => state, console.log);
-    console.log('App building');
+    console.log("App building");
 
     return {
       reset,
@@ -53,13 +54,25 @@ export default {
       counter,
       covid,
       incrementAsync,
-      decrementAsync,
+      decrementAsync
     };
-  },
+  }
 };
 </script>
 
-<style scoped>
+<style>
+@tailwind base;
+@tailwind components;
+
+.btn-blue {
+  @apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
+}
+.btn-blue:hover {
+  @apply bg-blue-700;
+}
+
+@tailwind utilities;
+
 img {
   width: 200px;
 }
