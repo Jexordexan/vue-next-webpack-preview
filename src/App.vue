@@ -9,6 +9,10 @@
     {{ todos.items.length }}
     <pre>{{ state }}</pre>
     <button @click="reset">Reset</button>
+
+    <hr />
+
+    <Covid />
   </div>
   <!-- <List :size="1200"></List> -->
 </template>
@@ -16,17 +20,28 @@
 <script>
 import List from './components/List.vue';
 import ToDo from './components/ToDo.vue';
-import { provideStore, useStore } from './store/index';
-import { watch } from 'vue';
+import Covid from "./components/Covid.vue";
+import { provideStore, useStore } from "./store/index";
+import { watch } from "vue";
 
 export default {
   components: {
     List,
     ToDo,
+    Covid
   },
   setup() {
     provideStore();
-    const { state, todos, counter, incrementAsync, decrementAsync, reset } = useStore();
+    const {
+      state,
+      todos,
+      counter,
+      incrementAsync,
+      decrementAsync,
+      reset,
+      covid
+    } = useStore();
+    covid.fetchStateData();
 
     watch(() => state, console.log);
     console.log('App building');
@@ -36,6 +51,7 @@ export default {
       todos,
       state,
       counter,
+      covid,
       incrementAsync,
       decrementAsync,
     };

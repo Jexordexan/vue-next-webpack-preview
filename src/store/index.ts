@@ -3,6 +3,7 @@ import createStore, { mutation } from '../vuex';
 import { computed } from 'vue';
 import counterModule from './counter';
 import todoModule from './todos';
+import covidModule from './covid';
 
 export interface ToDo {
   id: number;
@@ -23,6 +24,7 @@ const store = createStore({
   setup({ state, module }) {
     const todos = module(todoModule(state));
     const counter = module(counterModule);
+    const covid = module(covidModule);
 
     const reset = mutation('resetTodos', () => {
       todos.items.value = [];
@@ -33,6 +35,7 @@ const store = createStore({
       state,
       todos,
       reset,
+      covid,
       ...counter,
     };
   },
