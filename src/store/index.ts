@@ -1,6 +1,4 @@
-import { storeProvider } from '../useStore';
-import createStore, { mutation } from '../vuex';
-import { computed } from 'vue';
+import createStore, { mutation, createModule, storeProvider } from '../vuex';
 import counterModule from './counter';
 import todoModule from './todos';
 import covidModule from './covid';
@@ -21,10 +19,10 @@ const state: RootState = {
 
 const store = createStore({
   state,
-  setup({ state, module }) {
-    const todos = module(todoModule(state));
-    const counter = module(counterModule);
-    const covid = module(covidModule);
+  setup({ state }) {
+    const todos = createModule('todos', todoModule(state));
+    const counter = createModule('counter', counterModule);
+    const covid = createModule('covid', covidModule);
 
     const reset = mutation('resetTodos', () => {
       todos.items.value = [];

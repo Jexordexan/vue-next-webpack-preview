@@ -2,30 +2,33 @@ import api from '../api';
 import { defineModule, mutation } from '../vuex';
 
 export interface DataState {
-  state: string;
   positive: number;
   positiveScore: number;
   negativeScore: number;
   negativeRegularScore: number;
   commercialScore: number;
-  grade: string;
   score: number;
   negative: number;
-  pending: null;
-  hospitalizedCurrently: null;
+  pending: number;
+  hospitalizedCurrently: number;
   hospitalizedCumulative: number;
-  inIcuCurrently: null;
-  inIcuCumulative: null;
-  onVentilatorCurrently: null;
-  onVentilatorCumulative: null;
-  recovered: null;
-  lastUpdateEt: string;
-  checkTimeEt: string;
+  inIcuCurrently: number;
+  inIcuCumulative: number;
+  onVentilatorCurrently: number;
+  onVentilatorCumulative: number;
+  recovered: number;
   death: number;
   hospitalized: number;
   total: number;
   totalTestResults: number;
   posNeg: number;
+}
+
+export interface State extends DataState {
+  state: string;
+  grade: string;
+  lastUpdateEt: string;
+  checkTimeEt: string;
   fips: string;
   dateModified: string;
   dateChecked: string;
@@ -40,10 +43,10 @@ export default defineModule({
     daily: [] as DataState[],
   },
   setup({ state }) {
-    const setStates = mutation('setStates', val => {
+    const setStates = mutation('setStates', (val) => {
       state.states = val;
     });
-    const setDaily = mutation('setDaily', val => {
+    const setDaily = mutation('setDaily', (val: DataState[]) => {
       state.daily = val;
     });
 
