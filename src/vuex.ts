@@ -165,7 +165,10 @@ export function createModule<State extends object, R>(name: string, config: Modu
 
 export default function createStore<RootState extends object, R>(
   config: StoreOptions<RootState, R>
-): R & { $subscribe: (mutation: MutationObject, state: RootState) => void } {
+): R & {
+  $subscribe: (listener: (mutation: MutationObject, state: RootState) => any) => () => void;
+  $subscribeAction: (listener: (action: ActionObject, state: RootState) => any) => () => void;
+} {
   isInitializing = true;
   isStrict = !!config.strict;
   const state = reactive(config.state) as RootState;
@@ -174,12 +177,15 @@ export default function createStore<RootState extends object, R>(
   guard(state, config.strict);
   const store = config.setup({ state });
 
-  Object.defineProperty(store, '$subscribe', subscriber(state));
-  Object.defineProperty(store, '$subscribeAction', actionSubscriber(state));
+  const augmentedStore = Object.assign(store, {
+    $subscribe: subscriber(state),
+    $subscribeAction: actionSubscriber(state),
+  });
 
   stateStack.pop();
   isInitializing = false;
-  return store;
+
+  return augmentedStore;
 }
 
 export function storeProvider<T extends object>(store: T) {

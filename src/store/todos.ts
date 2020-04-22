@@ -23,8 +23,8 @@ export default (rootState: RootState) =>
         });
       });
 
-      const completeTodo = mutation('completeTodo', (id: number, completed: boolean = true) => {
-        const todo = state.items.find(t => t.id === id);
+      const completeTodo = mutation('completeTodo', ({ id, completed = true }: { id: number; completed: boolean }) => {
+        const todo = state.items.find((t) => t.id === id);
         if (todo) todo.completed = completed;
       });
 

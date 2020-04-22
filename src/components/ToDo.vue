@@ -13,8 +13,12 @@
     <div>First Completed: {{ firstCompleted }}</div>
     <div>Last Completed: {{ lastCompleted }}</div>
     <ul>
-      <li v-for="(todo, i) in items" :key="todo.id">
-        <input type="checkbox" :checked="todo.completed" @input="completeTodo(todo.id, $event.target.checked)" />
+      <li v-for="todo in items" :key="todo.id">
+        <input
+          type="checkbox"
+          :checked="todo.completed"
+          @input="completeTodo({ id: todo.id, completed: $event.target.checked })"
+        />
         {{ todo.text }}
         {{ todo.completed }}
       </li>

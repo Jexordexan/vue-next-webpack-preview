@@ -15,7 +15,7 @@
 
     <Covid />
   </div>
-  <!-- <List :size="1200"></List> -->
+  <List :size="1200"></List>
 </template>
 
 <script>
