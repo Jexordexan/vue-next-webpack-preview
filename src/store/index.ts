@@ -2,6 +2,7 @@ import createStore, { mutation, createModule, storeProvider } from '../vuex';
 import counterModule from './counter';
 import todoModule from './todos';
 import covidModule from './covid';
+import pokemonModule from './pokemon';
 
 export interface ToDo {
   id: number;
@@ -23,6 +24,7 @@ const store = createStore({
     const todos = createModule('todos', todoModule(state));
     const counter = createModule('counter', counterModule);
     const covid = createModule('covid', covidModule);
+    const pokemon = createModule('pokemon', pokemonModule);
 
     const reset = mutation('resetTodos', () => {
       todos.items.value = [];
@@ -34,6 +36,7 @@ const store = createStore({
       todos,
       reset,
       covid,
+      pokemon,
       ...counter,
     };
   },

@@ -8,7 +8,7 @@ module.exports = (env = {}) => ({
   entry: path.resolve(__dirname, './src/main.js'),
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: '/dist/',
+    publicPath: '/src/',
   },
   resolve: {
     extensions: ['.ts', '.js', '.tsx'],

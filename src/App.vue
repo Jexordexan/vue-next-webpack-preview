@@ -1,27 +1,27 @@
 <template>
   <div>
-    <img src="./logo.png" />
-    <h1>Hello Vue 3!</h1>
-    <button class="btn-blue" @click="decrementAsync">
+    <p-button @click="decrementAsync">
       Decrement
-    </button>
+    </p-button>
     Counter: {{ counter }}
-    <button class="btn-blue" @click="incrementAsync">Increment</button>
-    <ToDo />
+    <p-button @click="incrementAsync">Increment</p-button>
+    <!-- <ToDo /> -->
     {{ todos.items.length }}
     <p-button @click="reset">Reset</p-button>
 
     <hr />
 
-    <Covid />
+    <!-- <Covid /> -->
+    <Pokemon />
   </div>
-  <List :size="1200"></List>
+  <!-- <List :size="5000"></List> -->
 </template>
 
 <script>
 import List from './components/List.vue';
 import ToDo from './components/ToDo.vue';
 import Covid from './components/Covid.vue';
+import Pokemon from './components/Pokemon.vue';
 import { provideStore, useStore } from './store/index';
 import { watch } from 'vue';
 
@@ -30,6 +30,7 @@ export default {
     List,
     ToDo,
     Covid,
+    Pokemon,
   },
   setup() {
     provideStore();
@@ -38,6 +39,7 @@ export default {
 
     watch(() => state, console.log);
     console.log('App building');
+    console.log('Initial state', state);
 
     return {
       reset,
@@ -51,16 +53,3 @@ export default {
   },
 };
 </script>
-
-<style>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-img {
-  width: 200px;
-}
-h1 {
-  font-family: Arial, Helvetica, sans-serif;
-}
-</style>

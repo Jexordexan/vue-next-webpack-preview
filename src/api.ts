@@ -1,5 +1,5 @@
-import Axios from 'axios';
+const baseURL = 'https://covidtracking.com/api';
 
-export default Axios.create({
-  baseURL: 'https://covidtracking.com/api',
-});
+export default {
+  get: (path: string) => fetch(`${baseURL}/${path}`).then((r) => r.json()),
+};

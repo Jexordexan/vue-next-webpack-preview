@@ -52,8 +52,8 @@ export default defineModule({
 
     async function fetchStateData() {
       const [states, daily] = await Promise.all([api.get('states'), api.get('states/daily')]);
-      setDaily(daily.data);
-      setStates(states.data);
+      setDaily(daily);
+      setStates(states);
     }
 
     return {

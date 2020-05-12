@@ -1,13 +1,18 @@
 {
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server",
+    "dev": "vite",
+    "serve": "webpack-dev-server",
     "build": "webpack --env.prod"
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "tailwindcss": "^1.2.0",
-    "vue": "^3.0.0-beta.3"
+    "graphql": "^15.0.0",
+    "graphql-tag": "^2.10.3",
+    "tailwindcss": "^1.4.5",
+    "vue": "^3.0.0-beta.3",
+    "vue-apollo": "^3.0.0-alpha.3",
+    "vuex": "^4.0.0-beta.2"
   },
   "devDependencies": {
     "@vue/compiler-sfc": "^3.0.0-beta.3",
@@ -17,9 +22,11 @@
     "mini-css-extract-plugin": "^0.9.0",
     "postcss": "^7.0.27",
     "postcss-loader": "^3.0.0",
+    "ts-graphql-plugin": "^1.11.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.2",
     "url-loader": "^3.0.0",
+    "vite": "^0.12.0",
     "vue-loader": "^16.0.0-alpha.1",
     "webpack": "^4.41.4",
     "webpack-cli": "^3.3.10",
