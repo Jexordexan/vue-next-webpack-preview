@@ -20,7 +20,7 @@ const state: RootState = {
 
 const store = createStore({
   state,
-  setup({ state }) {
+  setup(state) {
     const todos = createModule('todos', todoModule(state));
     const counter = createModule('counter', counterModule);
     const covid = createModule('covid', covidModule);
@@ -28,7 +28,7 @@ const store = createStore({
 
     const reset = mutation('resetTodos', () => {
       todos.items.value = [];
-      counter.counter.value = 0;
+      counter.count.value = 0;
     });
 
     return {
@@ -43,5 +43,8 @@ const store = createStore({
 });
 
 export const { provideStore, useStore } = storeProvider(store);
+
+// @ts-ignore
+window.$store = store;
 
 export default store;

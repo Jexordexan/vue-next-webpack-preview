@@ -1,13 +1,9 @@
-import { reactive, effect } from '@vue/reactivity';
-import { InjectionKey, inject, provide } from 'vue';
-
-export interface SetupArgs<State> {
-  state: State;
-}
+import { reactive, watch, InjectionKey, inject, provide, watchEffect } from 'vue';
+import { isArray, isObject, isModule } from './util/vuex-helpers';
 
 export interface StoreOptions<State, R> {
   state: State;
-  setup(args: SetupArgs<State>): R;
+  setup(state: State): R;
   strict?: boolean;
 }
 
@@ -15,8 +11,12 @@ export interface ModuleOptions<State, R> extends StoreOptions<State, R> {
   name?: string;
 }
 
+type MutationFunction = (payload: any) => any;
+type ActionFunction = (...args: any[]) => any;
+
 interface MutationObject {
   type: string;
+  path: string;
   payload: any;
 }
 
@@ -89,50 +89,90 @@ const actionSubscriber = <T extends object>(state: T) => <T extends object>(
   };
 };
 
-export function mutation<A extends [any] | []>(type: string, mutator: (...args: A) => void): (...args: A) => void {
+export function mutation<M extends MutationFunction>(type: string, mutator: M): M {
   const path = modulePath.concat(type).join('/');
-  return (...args: A) => {
+  const wrapped = (payload: any) => {
     currentMutation = {
       type,
       path,
-      payload: args,
+      payload,
     };
-    const ret = mutator(...args);
+    console.log('MUTATION', currentMutation.path);
+    const ret = mutator(payload);
     currentMutation = null;
     return ret;
   };
+
+  return wrapped as M;
 }
 
-export function action<A extends [] | [any], R>(type: string, actor: (...args: A) => R): (...args: A) => R {
-  const path = modulePath.concat(type).join('/');
-  return (...args: A) => {
+export function action<A extends ActionFunction>(type: string, actor: A): A {
+  // const path = modulePath.concat(type).join('/');
+  const wrapped = (...args: any[]) => {
     const ret = actor(...args);
     return ret;
   };
+  return wrapped as A;
 }
 
 export function defineModule<State extends object, R>(config: ModuleOptions<State, R>): ModuleOptions<State, R> {
   return config;
 }
 
+const onTrigger = (path: any[]) => ({ type, key, target, oldValue, newValue }: any) => {
+  if (isInitializing) return;
+  const leftPad = currentMutation ? '  ' : '';
+  const prettyType = type.toUpperCase();
+  const prettyPath = path.join('/');
+  switch (type) {
+    case 'set':
+      console.log(leftPad, prettyType, prettyPath, key, oldValue, '=>', newValue);
+      break;
+    case 'add':
+      console.log(leftPad, prettyType, prettyPath, key, newValue);
+      break;
+    default:
+      console.log(leftPad, prettyType, prettyPath, key);
+  }
+};
+
+function traverse(value: unknown, seen: Set<object> = new Set()) {
+  if (!isObject(value) || seen.has(value)) {
+    return value;
+  }
+
+  if (seen.size > 0 && isModule(value)) {
+    return value;
+  }
+
+  seen.add(value);
+  if (isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      traverse(value[i], seen);
+    }
+  } else if (value instanceof Map) {
+    value.forEach((v, key) => {
+      // to register mutation dep for existing keys
+      traverse(value.get(key), seen);
+    });
+  } else if (value instanceof Set) {
+    value.forEach((v) => {
+      traverse(v, seen);
+    });
+  } else {
+    for (const key in value) {
+      traverse(value[key], seen);
+    }
+  }
+  return value;
+}
+
 function guard<T extends object>(state: T, strict: boolean = false) {
   states.add(state);
-  Object.keys(state).forEach((key) => {
-    effect(() => {
-      if (state[key as keyof T] !== undefined && !(isInitializing || currentMutation)) {
-        const keyPath = modulePath.concat(key).join('/');
-        if (strict) {
-          throw new Error('State mutated outside of a mutation: ' + keyPath);
-        } else {
-          console.warn('Do not mutate state outside a mutation: ' + keyPath);
-        }
-      } else if (currentMutation) {
-        if (!subscriptions.has(state)) return;
-        subscriptions.get(state)!.forEach((listener: Function) => {
-          listener.call(null, state, currentMutation);
-        });
-      }
-    });
+  const path = ['root', ...modulePath];
+
+  watchEffect(() => traverse(state), {
+    onTrigger: onTrigger(path),
   });
 }
 
@@ -147,6 +187,14 @@ export function createModule<State extends object, R>(name: string, config: Modu
     throw new Error(`Cannot create module outside of store setup()`);
   }
 
+  guard(state, config.strict);
+
+  Object.defineProperty(state, '__module_name', {
+    value: name,
+    enumerable: false,
+    configurable: false,
+  });
+
   if (currentState[name]) {
     throw new Error(`Module name ${name} conflicts with existing state or module`);
   } else {
@@ -154,8 +202,7 @@ export function createModule<State extends object, R>(name: string, config: Modu
     stateStack.push(state);
   }
 
-  guard(state, config.strict);
-  const storeModule = config.setup({ state });
+  const storeModule = config.setup(state);
 
   isStrict = wasStrict;
   stateStack.pop();
@@ -175,7 +222,7 @@ export default function createStore<RootState extends object, R>(
   stateStack.push(state);
 
   guard(state, config.strict);
-  const store = config.setup({ state });
+  const store = config.setup(state);
 
   const augmentedStore = Object.assign(store, {
     $subscribe: subscriber(state),

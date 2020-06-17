@@ -4,7 +4,7 @@
       v-for="pokemon in pokemons"
       :key="pokemon.id"
       class="bg-white rounded-lg p-3 shadow-lg m-3"
-      @click="state.active = pokemon"
+      @click="active = pokemon"
     >
       <h5>
         <div class="bg-gray-700 text-white rounded-full px-2 inline-block mr-2">{{ pokemon.number }}</div>
@@ -32,17 +32,17 @@
         >
       </div>
     </div>
-    <a-modal :visible="state.active" @close="state.active = null">
+    <a-modal :visible="active" @close="active = { id: null }">
       <div>
         <h5>
-          <div class="bg-gray-700 text-white rounded-full px-2 inline-block mr-2">{{ state.active.number }}</div>
-          <strong>{{ state.active.name }}</strong>
+          <div class="bg-gray-700 text-white rounded-full px-2 inline-block mr-2">{{ active.number }}</div>
+          <strong>{{ active.name }}</strong>
         </h5>
-        <img :src="state.active.image" class="mx-auto h-48 object-contain" />
+        <img :src="active.image" class="mx-auto h-48 object-contain" />
         <strong>Types:</strong>
         <div>
           <span
-            v-for="type in state.active.types"
+            v-for="type in active.types"
             :key="type"
             :style="getTypeBadgeStyles(type)"
             class="inline-block px-2 rounded-full mr-1"
@@ -52,7 +52,7 @@
         <strong>Weaknesses:</strong>
         <div>
           <span
-            v-for="type in state.active.weaknesses"
+            v-for="type in active.weaknesses"
             :key="type"
             :style="getTypeBadgeStyles(type)"
             class="inline-block px-2 rounded-full mr-1"
@@ -70,9 +70,9 @@ import { ref } from 'vue';
 export default {
   setup() {
     const {
-      pokemon: { state, load, all },
+      pokemon: { active, load, all },
     } = useStore();
-    load();
+    load().then(() => console.log('done loading'));
 
     const typeColors: Record<string, string> = {
       Grass: '#393',
@@ -121,7 +121,7 @@ export default {
     };
 
     return {
-      state,
+      active,
       pokemons: all,
       getTypeBadgeStyles,
     };

@@ -49,13 +49,7 @@ module.exports = (env = {}) => ({
             options: { hmr: !env.prod },
           },
           'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              ident: 'postcss',
-              plugins: [require('tailwindcss'), require('autoprefixer')],
-            },
-          },
+          'postcss-loader',
         ],
       },
     ],

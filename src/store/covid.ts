@@ -42,7 +42,7 @@ export default defineModule({
     states: [] as DataState[],
     daily: [] as DataState[],
   },
-  setup({ state }) {
+  setup(state) {
     const setStates = mutation('setStates', (val) => {
       state.states = val;
     });

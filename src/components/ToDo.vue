@@ -6,8 +6,8 @@
         newTodo = '';
       "
     >
-      <input type="text" v-model="newTodo" />
-      <button>Add</button>
+      <a-text-input v-model="newTodo" />
+      <a-button>Add</a-button>
     </form>
     <div>Completed: {{ getCompletedCount }}</div>
     <div>First Completed: {{ firstCompleted }}</div>

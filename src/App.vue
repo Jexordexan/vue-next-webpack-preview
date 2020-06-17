@@ -1,18 +1,25 @@
 <template>
-  <div>
-    <p-button @click="decrementAsync">
-      Decrement
-    </p-button>
-    Counter: {{ counter }}
-    <p-button @click="incrementAsync">Increment</p-button>
-    <!-- <ToDo /> -->
-    {{ todos.items.length }}
-    <p-button @click="reset">Reset</p-button>
+  <div class="flex h-screen">
+    <div class="w-1/2 h-full overflow-scroll">
+      <a-button @click="decrementAsync">
+        Decrement
+      </a-button>
+      Counter: {{ count }}
+      <a-button @click="incrementAsync">Increment</a-button>
+      <ToDo />
+      {{ todos.items.length }}
+      <a-button @click="reset">Reset</a-button>
 
-    <hr />
+      <hr />
 
-    <!-- <Covid /> -->
-    <Pokemon />
+      <!-- <Covid /> -->
+      <Pokemon />
+    </div>
+    <div class="w-1/2 h-full overflow-scroll">
+      <pre class="text-sm">
+        {{ state }}
+      </pre>
+    </div>
   </div>
   <!-- <List :size="5000"></List> -->
 </template>
@@ -23,7 +30,7 @@ import ToDo from './components/ToDo.vue';
 import Covid from './components/Covid.vue';
 import Pokemon from './components/Pokemon.vue';
 import { provideStore, useStore } from './store/index';
-import { watch } from 'vue';
+import { watch, watchEffect } from 'vue';
 
 export default {
   components: {
@@ -34,18 +41,14 @@ export default {
   },
   setup() {
     provideStore();
-    const { state, todos, counter, incrementAsync, decrementAsync, reset, covid } = useStore();
-    covid.fetchStateData();
-
-    watch(() => state, console.log);
-    console.log('App building');
-    console.log('Initial state', state);
+    const { state, todos, count, incrementAsync, decrementAsync, reset, covid } = useStore();
+    // covid.fetchStateData();
 
     return {
       reset,
       todos,
       state,
-      counter,
+      count,
       covid,
       incrementAsync,
       decrementAsync,

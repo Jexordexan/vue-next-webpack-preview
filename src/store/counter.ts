@@ -6,11 +6,14 @@ const wait = (ms: number) => new Promise((res) => setTimeout(() => res(), ms));
 export default defineModule({
   name: 'counter',
   state: {
-    counter: 0,
+    count: 0,
   },
-  setup({ state }) {
-    const increment = mutation('increment', () => state.counter++);
-    const decrement = mutation('decrement', () => state.counter--);
+  setup(state) {
+    const increment = () => state.count++;
+    const decrement = mutation('decrement', () => {
+      state.count--;
+      console.log('dec', state);
+    });
     const incrementAsync = action('incrementAsync', async () => {
       await wait(500);
       increment();

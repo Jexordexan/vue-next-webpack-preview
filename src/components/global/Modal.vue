@@ -25,7 +25,6 @@
           <div class="modal-content p-3">
             <slot />
           </div>
-          <slot />
         </div>
       </div>
     </teleport>

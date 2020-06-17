@@ -4,18 +4,18 @@ import { computed } from 'vue';
 
 export default defineModule({
   state: {
-    pokemonById: new Map<string, any>(),
+    pokemonById: {} as Record<string, IPokemon>,
     pokemonIds: [] as string[],
-    active: null as IPokemon | null,
+    activeId: '',
   },
-  setup({ state }) {
+  setup(state) {
     const updateMonters = mutation('updateMonsters', (monsters: IPokemon[]) => {
-      console.log(monsters);
-
       state.pokemonIds = monsters.map((p) => p.id);
+      const pokemonById: Record<string, IPokemon> = {};
       monsters.forEach((p) => {
-        state.pokemonById.set(p.id, p);
+        pokemonById[p.id] = p;
       });
+      state.pokemonById = pokemonById;
     });
 
     const load = action('fetchPokemon', async () => {
@@ -24,13 +24,23 @@ export default defineModule({
     });
 
     const all = computed(() => {
-      return state.pokemonIds.map((id) => state.pokemonById.get(id));
+      return state.pokemonIds.map((id) => state.pokemonById[id]).filter(Boolean);
     });
 
-    const getById = (id: string) => computed((_) => state.pokemonById.get(id));
+    const setActive = mutation('setActive', (id: string) => {
+      state.activeId = id || '';
+    });
+
+    const active = computed({
+      get: () => state.pokemonById[state.activeId] || null,
+      set: ({ id }) => setActive(id),
+    });
+
+    const getById = (id: string) => computed((_) => state.pokemonById[id]);
 
     return {
       state,
+      active,
       load,
       all,
       getById,
