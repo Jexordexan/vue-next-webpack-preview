@@ -1,4 +1,4 @@
-import { defineModule, mutation } from '../vuex';
+import { defineModule, mutation } from '../nuex';
 import { RootState } from '.';
 import { computed, toRefs } from 'vue';
 
@@ -15,7 +15,7 @@ export default (rootState: RootState) =>
       items: [] as ToDo[],
     },
     init(state) {
-      const addTodo = mutation('addTodo', (text: string) => {
+      const addTodo = mutation((text: string) => {
         state.items.push({
           id: rootState.idCounter++,
           text,
@@ -23,7 +23,7 @@ export default (rootState: RootState) =>
         });
       });
 
-      const completeTodo = mutation('completeTodo', ({ id, completed = true }: { id: number; completed: boolean }) => {
+      const completeTodo = mutation(({ id, completed = true }: { id: number; completed: boolean }) => {
         const todo = state.items.find((t) => t.id === id);
         if (todo) todo.completed = completed;
       });

@@ -1,4 +1,4 @@
-import { defineModule, action, mutation } from '../vuex';
+import { defineModule, action, mutation } from '../nuex';
 import { poke, IPokemon } from '../graphql/pokemon';
 import { computed } from 'vue';
 

@@ -1,4 +1,4 @@
-import createStore, { mutation, createModule, storeProvider } from '../vuex';
+import createStore, { mutation, createModule, storeProvider } from '../nuex';
 import counterModule from './counter';
 import todoModule from './todos';
 import covidModule from './covid';

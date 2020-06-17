@@ -1,4 +1,4 @@
-import { defineModule, mutation, action } from '../vuex';
+import { defineModule, mutation, action } from '../nuex';
 import { toRefs } from 'vue';
 
 const wait = (ms: number) => new Promise((res) => setTimeout(() => res(), ms));

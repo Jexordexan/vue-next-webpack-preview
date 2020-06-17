@@ -1,29 +1,15 @@
-import { reactive, watch, InjectionKey, inject, provide, watchEffect } from 'vue';
-import { isArray, isObject, isModule } from './util/vuex-helpers';
-
-export interface StoreOptions<State, R> {
-  state: State;
-  init(state: State): R;
-  strict?: boolean;
-}
-
-export interface ModuleOptions<State, R> extends StoreOptions<State, R> {
-  name?: string;
-}
-
-type MutationFunction = (payload: any) => any;
-type ActionFunction = (...args: any[]) => any;
-
-interface MutationObject {
-  type: string;
-  path: string;
-  payload: any;
-}
-
-interface ActionObject extends MutationObject {}
-
-type Listener<T> = (action: ActionObject, state: T) => void;
-type SubscribeOptions<T> = Listener<T> | { before: Listener<T>; after: Listener<T> };
+import { reactive, InjectionKey, inject, provide, watchEffect } from 'vue';
+import { isArray, isObject, isModule, isMutation } from './util/nuex-helpers';
+import {
+  Listener,
+  MutationObject,
+  SubscribeOptions,
+  MutationFunction,
+  ActionFunction,
+  ModuleOptions,
+  StoreOptions,
+  Store,
+} from './util/nuex-types';
 
 // Globals
 let isStrict = false;
@@ -89,21 +75,28 @@ const actionSubscriber = <T extends object>(state: T) => <T extends object>(
   };
 };
 
-export function mutation<M extends MutationFunction>(type: string, mutator: M): M {
-  const path = modulePath.concat(type).join('/');
-  const wrapped = (payload: any) => {
+export function mutation<M extends MutationFunction>(mutator: M): M;
+export function mutation<M extends MutationFunction>(type: string, mutator: M): M;
+export function mutation<M extends MutationFunction>(arg1: string | M, arg2?: M): M {
+  const name = typeof arg1 === 'string' ? arg1 : '';
+  const mutator = typeof arg1 === 'function' ? arg1 : arg2!;
+
+  const path = modulePath.join('/');
+  const wrapped = ((payload: any) => {
     currentMutation = {
-      type,
+      type: name,
       path,
       payload,
     };
-    console.log('MUTATION', currentMutation.path);
+    console.log('MUTATION', `${currentMutation.path}/${wrapped.__nuex_mutation_name}`);
     const ret = mutator(payload);
     currentMutation = null;
     return ret;
-  };
+  }) as M;
 
-  return wrapped as M;
+  Object.defineProperty(wrapped, '__nuex_mutation_name', { value: name, writable: true });
+
+  return wrapped;
 }
 
 export function action<A extends ActionFunction>(type: string, actor: A): A {
@@ -176,6 +169,15 @@ function guard<T extends object>(state: T, strict: boolean = false) {
   });
 }
 
+function nameMutations<T>(storeObject: T) {
+  Object.keys(storeObject).forEach((key) => {
+    const val = storeObject[key as keyof T];
+    if (isMutation(val) && val.__nuex_mutation_name === '') {
+      val.__nuex_mutation_name = key;
+    }
+  });
+}
+
 export function createModule<State extends object, R>(name: string, config: ModuleOptions<State, R>): R {
   modulePath.push(name);
   const wasStrict = isStrict;
@@ -189,11 +191,7 @@ export function createModule<State extends object, R>(name: string, config: Modu
 
   guard(state, config.strict);
 
-  Object.defineProperty(state, '__module_name', {
-    value: name,
-    enumerable: false,
-    configurable: false,
-  });
+  Object.defineProperty(state, '__nuex_module_name', { value: name });
 
   if (currentState[name]) {
     throw new Error(`Module name ${name} conflicts with existing state or module`);
@@ -204,18 +202,15 @@ export function createModule<State extends object, R>(name: string, config: Modu
 
   const storeModule = config.init(state);
 
+  nameMutations(storeModule);
+
   isStrict = wasStrict;
   stateStack.pop();
   modulePath.pop();
   return storeModule;
 }
 
-export default function createStore<RootState extends object, R>(
-  config: StoreOptions<RootState, R>
-): R & {
-  $subscribe: (listener: (mutation: MutationObject, state: RootState) => any) => () => void;
-  $subscribeAction: (listener: (action: ActionObject, state: RootState) => any) => () => void;
-} {
+export default function createStore<RootState extends object, R>(config: StoreOptions<RootState, R>): Store<R> {
   isInitializing = true;
   isStrict = !!config.strict;
   const state = reactive(config.state) as RootState;
@@ -223,6 +218,8 @@ export default function createStore<RootState extends object, R>(
 
   guard(state, config.strict);
   const store = config.init(state);
+
+  nameMutations(store);
 
   const augmentedStore = Object.assign(store, {
     $subscribe: subscriber(state),

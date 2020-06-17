@@ -1,5 +1,5 @@
 import api from '../api';
-import { defineModule, mutation } from '../vuex';
+import { defineModule, mutation } from '../nuex';
 
 export interface DataState {
   positive: number;
