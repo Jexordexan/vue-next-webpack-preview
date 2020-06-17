@@ -20,7 +20,7 @@ const state: RootState = {
 
 const store = createStore({
   state,
-  setup(state) {
+  init(state) {
     const todos = createModule('todos', todoModule(state));
     const counter = createModule('counter', counterModule);
     const covid = createModule('covid', covidModule);

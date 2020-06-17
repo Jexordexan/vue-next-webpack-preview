@@ -8,7 +8,7 @@ export default defineModule({
   state: {
     count: 0,
   },
-  setup(state) {
+  init(state) {
     const increment = () => state.count++;
     const decrement = mutation('decrement', () => {
       state.count--;

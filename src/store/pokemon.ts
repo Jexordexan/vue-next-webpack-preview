@@ -8,7 +8,7 @@ export default defineModule({
     pokemonIds: [] as string[],
     activeId: '',
   },
-  setup(state) {
+  init(state) {
     const updateMonters = mutation('updateMonsters', (monsters: IPokemon[]) => {
       state.pokemonIds = monsters.map((p) => p.id);
       const pokemonById: Record<string, IPokemon> = {};

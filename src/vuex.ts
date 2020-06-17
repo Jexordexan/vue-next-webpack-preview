@@ -3,7 +3,7 @@ import { isArray, isObject, isModule } from './util/vuex-helpers';
 
 export interface StoreOptions<State, R> {
   state: State;
-  setup(state: State): R;
+  init(state: State): R;
   strict?: boolean;
 }
 
@@ -184,7 +184,7 @@ export function createModule<State extends object, R>(name: string, config: Modu
   const currentState = stateStack[stateStack.length - 1];
 
   if (!isInitializing) {
-    throw new Error(`Cannot create module outside of store setup()`);
+    throw new Error(`Cannot create module outside of store init()`);
   }
 
   guard(state, config.strict);
@@ -202,7 +202,7 @@ export function createModule<State extends object, R>(name: string, config: Modu
     stateStack.push(state);
   }
 
-  const storeModule = config.setup(state);
+  const storeModule = config.init(state);
 
   isStrict = wasStrict;
   stateStack.pop();
@@ -222,7 +222,7 @@ export default function createStore<RootState extends object, R>(
   stateStack.push(state);
 
   guard(state, config.strict);
-  const store = config.setup(state);
+  const store = config.init(state);
 
   const augmentedStore = Object.assign(store, {
     $subscribe: subscriber(state),

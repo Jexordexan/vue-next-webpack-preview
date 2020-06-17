@@ -14,7 +14,7 @@ export default (rootState: RootState) =>
     state: {
       items: [] as ToDo[],
     },
-    setup(state) {
+    init(state) {
       const addTodo = mutation('addTodo', (text: string) => {
         state.items.push({
           id: rootState.idCounter++,
