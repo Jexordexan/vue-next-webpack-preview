@@ -1,5 +1,5 @@
 import { reactive, InjectionKey, inject, provide, watchEffect } from 'vue';
-import { isArray, isObject, isModule, isMutation } from './util/nuex-helpers';
+import { isArray, isObject, isModule, isMutation, isPromise } from './util/nuex-helpers';
 import {
   Listener,
   MutationObject,
@@ -88,7 +88,7 @@ export function mutation<M extends MutationFunction>(arg1: string | M, arg2?: M)
       path,
       payload,
     };
-    console.log('MUTATION', `${currentMutation.path}/${wrapped.__nuex_mutation_name}`);
+    console.log('MUTATION', `${path}/${wrapped.__nuex_mutation_name}`);
     const ret = mutator(payload);
     currentMutation = null;
     return ret;
@@ -99,13 +99,29 @@ export function mutation<M extends MutationFunction>(arg1: string | M, arg2?: M)
   return wrapped;
 }
 
-export function action<A extends ActionFunction>(type: string, actor: A): A {
-  // const path = modulePath.concat(type).join('/');
-  const wrapped = (...args: any[]) => {
-    const ret = actor(...args);
+export function action<A extends ActionFunction>(actor: A): A;
+export function action<A extends ActionFunction>(type: string, mutator: A): A;
+export function action<A extends ActionFunction>(arg1: string | A, arg2?: A): A {
+  const name = typeof arg1 === 'string' ? arg1 : '';
+  const actor = typeof arg1 === 'function' ? arg1 : arg2!;
+
+  const path = modulePath.join('/');
+  const wrapped = ((payload: any) => {
+    console.log('STARTED', `${path}/${wrapped.__nuex_action_name}`);
+
+    const ret = actor(payload);
+    if (isPromise(ret)) {
+      ret.then(() => console.log('FINISHED', `${path}/${wrapped.__nuex_action_name}`));
+    } else {
+      console.log('FINISHED', `${path}/${wrapped.__nuex_action_name}`);
+    }
+
     return ret;
-  };
-  return wrapped as A;
+  }) as A;
+
+  Object.defineProperty(wrapped, '__nuex_action_name', { value: name, writable: true });
+
+  return wrapped;
 }
 
 export function defineModule<State extends object, R>(config: ModuleOptions<State, R>): ModuleOptions<State, R> {

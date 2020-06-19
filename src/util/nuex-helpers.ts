@@ -15,3 +15,7 @@ export function isModule(val: any): val is StoreModule<any> {
 export function isMutation(val: any): val is MutationFunction {
   return val && typeof val === 'function' && val.hasOwnProperty('__nuex_mutation_name');
 }
+
+export function isPromise(val: any): val is Promise<any> {
+  return val instanceof Promise;
+}
